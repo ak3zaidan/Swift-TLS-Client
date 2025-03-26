@@ -5,20 +5,20 @@ import PackageDescription
 
 let package = Package(
     name: "swift-tls-client",
+    platforms: [
+        .iOS(.v17) // Specify iOS as the only platform
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "swift-tls-client",
             targets: ["swift-tls-client"]),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "swift-tls-client"),
+            name: "swift-tls-client",
+            dependencies: []),
         .testTarget(
             name: "swift-tls-clientTests",
-            dependencies: ["swift-tls-client"]
-        ),
+            dependencies: ["swift-tls-client"]),
     ]
 )
