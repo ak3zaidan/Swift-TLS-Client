@@ -8,6 +8,9 @@ A TLS Client written in Native Swift
 - The proxy is expected to be a string in the following format:
     - "Host:Port:Username:Password"
 
+For an http request to be sent out from an iOS device you MUST add the following entry into your info.plist file:
+    - NSAllowsArbitraryLoads: true
+
 **To setup a Client just do:**
 
 ```
