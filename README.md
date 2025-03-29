@@ -9,6 +9,7 @@ A TLS Client written in Native Swift
     - "Host:Port:Username:Password"
 
 For an http request to be sent out from an iOS device you MUST add the following entry into your info.plist file:
+
     - NSAllowsArbitraryLoads: true
 
 **To setup a Client just do:**
