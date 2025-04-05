@@ -232,9 +232,27 @@ func parseHTTPResponse(rawResponse: String) -> HTTPResponse? {
         }
     }
 
-    if let blankLineIndex = lines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces).isEmpty }),
-       blankLineIndex + 1 < lines.count {
-        responseBody = lines[blankLineIndex...].joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+    if let headersEndIndex = rawResponse.range(of: "\r\n\r\n", options: .literal)?.upperBound {
+        let rawBody = String(rawResponse[headersEndIndex...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        var body = ""
+        let parts = rawBody.split(separator: "\r\n").map(String.init)
+        var i = 0
+        
+        while i < parts.count {
+            if let chunkSize = Int(parts[i], radix: 16) {
+                if chunkSize == 0 {
+                    break
+                }
+                i += 1
+                if i < parts.count {
+                    body += parts[i]
+                }
+            }
+            i += 1
+        }
+        
+        responseBody = body
     }
 
     return HTTPResponse(statusCode: statusCode, responseBody: responseBody, setCookies: setCookies, redirectURL: redirectURL)
@@ -320,14 +338,23 @@ class Client {
             if let cookieDomain = cookie.domain, urlHost.contains(cookieDomain) || cookieDomain.contains(urlHost) {
                 // Check if the cookie's path is applicable to the URL's path
                 if let cookiePath = cookie.path, urlPath.starts(with: cookiePath) {
-                    cookiesForRequest[cookie.name] = cookie.value
+                    if !cookie.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                        !cookie.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        cookiesForRequest[cookie.name] = cookie.value
+                    }
                 } else if cookie.path == nil {
-                    // If no path is specified, assume the cookie applies to the entire domain
-                    cookiesForRequest[cookie.name] = cookie.value
+                    if !cookie.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                        !cookie.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        // If no path is specified, assume the cookie applies to the entire domain
+                        cookiesForRequest[cookie.name] = cookie.value
+                    }
                 }
             } else if cookie.domain == nil {
-                // If no domain is specified, assume the cookie applies to any domain (not a typical behavior, but for demonstration)
-                cookiesForRequest[cookie.name] = cookie.value
+                // If no domain is specified, assume the cookie applies to any domain
+                if !cookie.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                    !cookie.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    cookiesForRequest[cookie.name] = cookie.value
+                }
             }
         }
         
