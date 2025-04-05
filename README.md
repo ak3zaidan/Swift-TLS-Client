@@ -55,6 +55,8 @@ let response = await client.request(
 )
 ```
 
+**Important**: Use `"Connection": "close"` in the headers, otherwise the Client will try to keep reading bytes even after the response is fully read. The Client will keep listening on the connection until it times out.
+
 **The response contains a tupile of (response?, error?)**
 
 - The response is of type:
